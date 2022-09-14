@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const req = require('express/lib/request');
 const res = require('express/lib/response');
+const { json } = require('express/lib/response');
 
 const app = express();
 const port = 3000;
@@ -39,11 +40,52 @@ app.get('/nezelodo', (req, res) =>{
 })
 
 app.post('/senddata', (req, res)=>{
+    /*
     var name = req.body.name
     var osztaly = req.body.osztaly
     var lakcim = req.body.lakcim
     var kor = req.body.kor
+    */
 
+    var adatok = [];
+    var adat = {
+        "name" : req.body.name,
+        "osztaly" : req.body.osztaly,
+        "lakcim" : req.body.lakcim,
+        "kor" : req.body.kor
+    }
+
+    adatok.push(adat);
+
+    fs.readFile('adatok.json', (err, data)=>{
+        if(err)
+        {
+            res.status(500).send('Hiba a fájl olvasása közben')
+        }
+        else
+        {           
+            adatok = JSON.parse(data);
+
+            var adat =  {
+                "name" : req.body.name,
+                "osztaly" : req.body.osztaly,
+                "lakcim" : req.body.lakcim,
+                "kor" : req.body.kor
+            }
+
+            adatok.push(adat);
+
+            fs.appendFile('adatok.json', json.stringify(adatok), (err)=>{
+                if(err){
+                    res.status(500).send('Hiba a fájl mentése közben')
+                } else{
+                    res.status(200).send('Adatok elmentve')
+                }
+            })
+        }
+    })
+
+/*
     fs.appendFile('adatok.csv', `${name};${osztaly};${lakcim};${kor}\n`, (err)=>{
         if(err){
             res.status(500).send('Hiba a fájl mentése közben')
@@ -51,8 +93,9 @@ app.post('/senddata', (req, res)=>{
             res.status(200).send('Adatok elmentve')
         }
     })
+    */
 })
 
 app.listen(port, ()=>{
     console.log(`Server listening on port ${port}...`);
-})
+});
